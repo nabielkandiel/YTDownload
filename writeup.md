@@ -21,6 +21,10 @@ The first thing I did was set up pipenv by running the following commands in my 
   * Installs pytest but only for development purposes. If we were to deployt to prouduction with pipenv, this would be emitted
 * pipenv install pyside6   
   * Qt for frontend
+* pipenv install requests
+  * to retrieve thumbnail from video
+* pipenv install ffmpeg-python
+  * combine audio and video 
 * pipenv --venv
   * This was run to see where the virutal enviorment python interpreter is installed so I could point VS Code to it.  
 
@@ -30,7 +34,7 @@ The first thing I did was set up pipenv by running the following commands in my 
 
 Learning resouces for Qt for Python can be found [here](https://doc.qt.io/qtforpython/tutorials/index.html).
 
-#### Qt
+### Qt
 
 The basic flow of a Qt app seems to be
 1. create a QApplication object.
@@ -39,6 +43,11 @@ The basic flow of a Qt app seems to be
 4. call app.exec on your QApllication object 
    * this call start running the code by entering Qt's main loop
 
+#### Signals & Slots
+
+Documentation can be found [here](https://doc.qt.io/qtforpython/tutorials/basictutorial/signals_and_slots.html).
+
+Signals and slots are a part of the Qt library that provide a convenient way to connect the front end to the backend of the application. It is really just a publish subscribe mechanism. Signals are a way for a GUI component to publish that some action has occured. Slots are functions that are connected (subscribed) to signals and perform some action. Multiple slots can be connected to the same signal and multiple signals to the same slot. 
 
 ---
 

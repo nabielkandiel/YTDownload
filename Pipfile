@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 pytube = {editable = true, git = "https://github.com/pytube/pytube.git"}
 pyside6 = "*"
+requests = "*"
+ffmpeg-python = "*"
 
 [dev-packages]
 pytest = "*"
