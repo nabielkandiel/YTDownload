@@ -5,12 +5,14 @@ import requests
 class Form(QtWidgets.QDialog):
     def __init__(self, parent = None):
         super(Form, self).__init__(parent)
+        self.__yt = None
         # Creating Widgets
         self.__buildLinkInput()
         self.__buildSubmitButton()
         self.__buildClearButton()
         self.__buildDownloadSelector()
         self.__buildDownloadButton()
+        self.__buildVideoTitle()
         self.__thumbLabel = QtWidgets.QLabel()
         
         self.__designLayout()
@@ -28,12 +30,20 @@ class Form(QtWidgets.QDialog):
         self.__layout = QtWidgets.QVBoxLayout()
         self.__layout.addWidget(self.__linkEdit)
         self.__layout.addLayout(hlayout)
+        self.__layout.addWidget(self.__titleLable)
         self.__layout.addWidget(self.__thumbLabel)
         self.__layout.addLayout(hlayout2)
         self.__layout.setAlignment(QtCore.Qt.AlignCenter)
 
         # Set dialog layout
         self.setLayout(self.__layout)
+
+
+    def __buildVideoTitle(self) -> None:
+        self.__titleLable = QtWidgets.QLabel("No Video Selected")
+        self.__titleLable.setFont(QtGui.QFont('Arial',weight=QtGui.QFont.Bold, pointSize=18))
+        self.__titleLable.setAlignment(QtCore.Qt.AlignCenter)
+
 
 
     def __buildDownloadButton(self) -> None:
@@ -61,6 +71,10 @@ class Form(QtWidgets.QDialog):
         self.__clearButton.clicked.connect(self.clearText)
 
 
+    def __updateVideoTitle(self) -> None:
+        self.__titleLable.setText(self.__yt.getTitle())
+
+
     @QtCore.Slot()
     def clearText(self) -> None:
         self.__linkEdit.clear()
@@ -68,7 +82,8 @@ class Form(QtWidgets.QDialog):
 
     @QtCore.Slot()
     def downloadBtnPress(self) -> None:
-        self.__yt.download(self.__downloadSelector.currentText())
+        if self.__yt != None:
+            self.__yt.download(self.__downloadSelector.currentText())
 
     
     @QtCore.Slot()
@@ -76,6 +91,7 @@ class Form(QtWidgets.QDialog):
         self.__yt = YTinterface()
         if not self.__yt.submitLink(self.__linkEdit.text()):
             return
+        self.__updateVideoTitle()
         self.__yt.getStreams()
         req = requests.get(self.__yt.getThumbURL())
         image = QtGui.QImage()
