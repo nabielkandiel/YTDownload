@@ -13,6 +13,7 @@ class Form(QtWidgets.QDialog):
         self.__buildDownloadSelector()
         self.__buildDownloadButton()
         self.__buildVideoTitle()
+        self.__buildStateLabel()
         self.__thumbLabel = QtWidgets.QLabel()
         
         self.__designLayout()
@@ -25,6 +26,7 @@ class Form(QtWidgets.QDialog):
         hlayout.addWidget(self.__subButton)
         hlayout.addWidget(self.__clearButton)
         hlayout2 = QtWidgets.QHBoxLayout()
+        hlayout2.addWidget(self.__stateLabel)
         hlayout2.addWidget(self.__downloadSelector)
         hlayout2.addWidget(self.__downloadButton)
         self.__layout = QtWidgets.QVBoxLayout()
@@ -39,6 +41,13 @@ class Form(QtWidgets.QDialog):
         self.setLayout(self.__layout)
 
 
+    def __buildStateLabel(self) -> None:
+        self.__stateLabel = QtWidgets.QLabel("Idle")
+        self.__stateLabel.setStyleSheet("background-color: lightgreen")
+        self.__stateLabel.setFixedWidth(100)
+        self.__stateLabel.setAlignment(QtCore.Qt.AlignCenter)
+
+
     def __buildVideoTitle(self) -> None:
         self.__titleLable = QtWidgets.QLabel("No Video Selected")
         self.__titleLable.setFont(QtGui.QFont('Arial',weight=QtGui.QFont.Bold, pointSize=18))
@@ -48,7 +57,7 @@ class Form(QtWidgets.QDialog):
 
     def __buildDownloadButton(self) -> None:
         self.__downloadButton = QtWidgets.QPushButton("Download")
-        self.__downloadButton.setFixedWidth(100)
+        self.__downloadButton.setFixedWidth(75)
         self.__downloadButton.clicked.connect(self.downloadBtnPress)
 
     def __buildDownloadSelector(self) -> None:
@@ -75,6 +84,22 @@ class Form(QtWidgets.QDialog):
         self.__titleLable.setText(self.__yt.getTitle())
 
 
+    def __changeStateLabel(self, state: int) -> None:
+        if state == 0:
+            self.__stateLabel.setStyleSheet("background-color: lightgreen")
+            self.__stateLabel.setText("Idle")
+        elif state == 1:
+            self.__stateLabel.setStyleSheet("background-color: lightblue")
+            self.__stateLabel.setText("Getting Streams")
+        elif state == 2:
+            self.__stateLabel.setStyleSheet("background-color: orange")
+            self.__stateLabel.setText("Downloading")
+        elif state == 3:
+            self.__stateLabel.setStyleSheet("background-color: orangered")
+            self.__stateLabel.setText("Combining")
+        self.__stateLabel.repaint()
+
+
     @QtCore.Slot()
     def clearText(self) -> None:
         self.__linkEdit.clear()
@@ -82,14 +107,23 @@ class Form(QtWidgets.QDialog):
 
     @QtCore.Slot()
     def downloadBtnPress(self) -> None:
-        if self.__yt != None:
-            self.__yt.download(self.__downloadSelector.currentText())
+        if self.__yt == None:
+            self.__changeStateLabel(0)
+            return
+        self.__changeStateLabel(2)
+        comb = self.__yt.download(self.__downloadSelector.currentText())
+        if comb:
+            self.__changeStateLabel(3)
+            self.__yt.combine()
+        self.__changeStateLabel(0)
 
     
     @QtCore.Slot()
     def linkSubmit(self) -> None:
         self.__yt = YTinterface()
+        self.__changeStateLabel(1)
         if not self.__yt.submitLink(self.__linkEdit.text()):
+            self.__changeStateLabel(0)
             return
         self.__updateVideoTitle()
         self.__yt.getStreams()
@@ -102,3 +136,4 @@ class Form(QtWidgets.QDialog):
         streams = self.__yt.getStreams()
         for stream in streams:
             self.__downloadSelector.addItem(stream)
+        self.__changeStateLabel(0)

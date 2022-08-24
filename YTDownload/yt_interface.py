@@ -55,19 +55,20 @@ class YTinterface():
         return self.__streams
 
     
-    def download(self, stream: str) -> None:
+    def download(self, stream: str) -> bool:
         if self.__video == None:
             print("Video not set yet")
-            return None
+            return False
         if stream != "audio":
             video = self.__video.streams.get_by_itag(self.__streams["audio"])
             video.download(filename="audio.mp4")
             video = self.__video.streams.get_by_itag(self.__streams[stream])
             video.download(filename="video.mp4")
-            self.combine()
+            return True
         else:
             video = self.__video.streams.get_by_itag(self.__streams["audio"])
             video.download()
+            return False
 
 
     def combine(self) -> None:
