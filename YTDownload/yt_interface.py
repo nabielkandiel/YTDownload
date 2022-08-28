@@ -76,7 +76,6 @@ class YTinterface():
         input_video = ffmpeg.input('audio.mp4')
         input_audio = ffmpeg.input('video.mp4')
         title = self.getTitle()
-        system = platform.system()
         outFileName = '{}/{}.mp4'.format(loc, title)
         out = ffmpeg.output(input_video, input_audio, outFileName, vcodec='copy', acodec='aac', strict='experimental')
         out.run()
