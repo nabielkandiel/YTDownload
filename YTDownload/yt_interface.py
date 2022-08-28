@@ -1,6 +1,7 @@
 from pytube import YouTube, exceptions
 import ffmpeg
 import os
+import platform
 
 class YTinterface():
     def __init__(self):
@@ -56,7 +57,7 @@ class YTinterface():
         return self.__streams
 
     
-    def download(self, stream: str) -> bool:
+    def download(self, stream: str, outPath: str) -> bool:
         if self.__video == None:
             print("Video not set yet")
             return False
@@ -68,16 +69,20 @@ class YTinterface():
             return True
         else:
             video = self.__video.streams.get_by_itag(self.__streams["audio"])
-            video.download()
+            video.download(output_path=outPath)
             return False
 
 
-    def combine(self) -> None:
+    def combine(self, loc: str) -> None:
         input_video = ffmpeg.input('audio.mp4')
         input_audio = ffmpeg.input('video.mp4')
         title = self.getTitle()
-        #ffmpeg.concat(input_video, input_audio, v=1, a=1).output('combine.mp4').run()
-        out = ffmpeg.output(input_video, input_audio, '{}.mp4'.format(title), vcodec='copy', acodec='aac', strict='experimental')
+        system = platform.system()
+        if system == "Windows":
+            outFileName = '{}/{}.mp4'.format(loc, title)
+        else:
+            outFileName = '{}\{}.mp4'.format(loc, title)
+        out = ffmpeg.output(input_video, input_audio, outFileName, vcodec='copy', acodec='aac', strict='experimental')
         out.run()
         os.remove('audio.mp4')
         os.remove('video.mp4')

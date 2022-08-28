@@ -10,6 +10,7 @@ class Form(QtWidgets.QDialog):
         self.__buildLinkInput()
         self.__buildSubmitButton()
         self.__buildClearButton()
+        self.__buildOutputSelector()
         self.__buildDownloadSelector()
         self.__buildDownloadButton()
         self.__buildVideoTitle()
@@ -31,6 +32,9 @@ class Form(QtWidgets.QDialog):
         hlayout2.addWidget(self.__downloadButton)
         self.__layout = QtWidgets.QVBoxLayout()
         self.__layout.addWidget(self.__linkEdit)
+
+        self.__layout.addWidget(self.__dest_box)
+
         self.__layout.addLayout(hlayout)
         self.__layout.addWidget(self.__titleLable)
         self.__layout.addWidget(self.__thumbLabel)
@@ -40,6 +44,20 @@ class Form(QtWidgets.QDialog):
         # Set dialog layout
         self.setLayout(self.__layout)
 
+
+    def __buildOutputSelector(self) -> None:
+        self.__dest_box = QtWidgets.QLineEdit()
+        self._open_folder_action = self.__dest_box.addAction(
+                self.style().standardIcon(QtWidgets.QStyle.SP_DirOpenIcon), 
+                QtWidgets.QLineEdit.TrailingPosition
+        )
+        #  Default destination dir
+        self.__dest_box.setText(
+            QtCore.QDir.fromNativeSeparators(
+                QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.DownloadLocation)
+            )
+        )
+        self._open_folder_action.triggered.connect(self.on_open_folder)
 
     def __buildStateLabel(self) -> None:
         self.__stateLabel = QtWidgets.QLabel("Idle")
@@ -84,6 +102,10 @@ class Form(QtWidgets.QDialog):
         self.__titleLable.setText(self.__yt.getTitle())
 
 
+    def __get_dl_loc(self) -> str:
+        return self.__dest_box.text()
+
+
     def __changeStateLabel(self, state: int) -> None:
         if state == 0:
             self.__stateLabel.setStyleSheet("background-color: lightgreen")
@@ -111,10 +133,13 @@ class Form(QtWidgets.QDialog):
             self.__changeStateLabel(0)
             return
         self.__changeStateLabel(2)
-        comb = self.__yt.download(self.__downloadSelector.currentText())
+        comb = self.__yt.download(
+            self.__downloadSelector.currentText(),
+            self.__get_dl_loc()
+        )
         if comb:
             self.__changeStateLabel(3)
-            self.__yt.combine()
+            self.__yt.combine(self.__get_dl_loc())
         self.__changeStateLabel(0)
 
     
@@ -137,3 +162,15 @@ class Form(QtWidgets.QDialog):
         for stream in streams:
             self.__downloadSelector.addItem(stream)
         self.__changeStateLabel(0)
+
+
+    @QtCore.Slot()
+    def on_open_folder(self):
+
+        dir_path = QtWidgets.QFileDialog.getExistingDirectory(
+            self, "Open Directory", QtCore.QDir.homePath(), QtWidgets.QFileDialog.ShowDirsOnly
+        )
+
+        if dir_path:
+            dest_dir = QtCore.QDir(dir_path)
+            self.__dest_box.setText(QtCore.QDir.fromNativeSeparators(dest_dir.path()))
