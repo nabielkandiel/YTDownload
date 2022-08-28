@@ -1,7 +1,6 @@
 from pytube import YouTube, exceptions
 import ffmpeg
 import os
-import platform
 
 class YTinterface():
     def __init__(self):
@@ -78,10 +77,7 @@ class YTinterface():
         input_audio = ffmpeg.input('video.mp4')
         title = self.getTitle()
         system = platform.system()
-        if system == "Windows":
-            outFileName = '{}/{}.mp4'.format(loc, title)
-        else:
-            outFileName = '{}\{}.mp4'.format(loc, title)
+        outFileName = '{}/{}.mp4'.format(loc, title)
         out = ffmpeg.output(input_video, input_audio, outFileName, vcodec='copy', acodec='aac', strict='experimental')
         out.run()
         os.remove('audio.mp4')
